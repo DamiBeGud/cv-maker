@@ -332,8 +332,10 @@ export default function CVBuilder() {
   };
 
   // Validate image type and size
+  const validTypes = [
+    'image/jpeg', 'image/png', 'image/jpg', 'image/jfif', 'image/pjpeg', 'image/pjp', 'image/gif', 'image/bmp', 'image/webp'
+  ];
   const validateImage = (file: File) => {
-    const validTypes = ['image/jpeg', 'image/png'];
     const maxSize = 2 * 1024 * 1024; // 2MB
     return validTypes.includes(file.type) && file.size <= maxSize;
   };
@@ -355,7 +357,7 @@ export default function CVBuilder() {
       if (!validateImage(file)) {
         toast({
           title: "Invalid Image",
-          description: "Please upload a JPEG or PNG image under 2MB.",
+          description: "Please upload an image (JPG, JPEG, PNG, JFIF, PJPEG, PJP, GIF, BMP, WEBP) under 2MB.",
           variant: "destructive"
         });
         return;
