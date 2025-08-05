@@ -23,8 +23,7 @@ import {
   Briefcase, 
   Award,
   Globe,
-  Camera,
-  Calendar
+  Camera
 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -125,6 +124,7 @@ const translations = {
     native: 'Native',
     present: 'Present',
     dateOfBirth: 'Date of Birth',
+    age: 'Age',
     showAge: 'Show Age Instead',
     uploadImage: 'Upload Profile Image',
     showImage: 'Show Image in CV',
@@ -172,6 +172,7 @@ const translations = {
     native: 'Nativo',
     present: 'Presente',
     dateOfBirth: 'Fecha de Nacimiento',
+    age: 'Edad',
     showAge: 'Mostrar Edad',
     uploadImage: 'Subir Imagen de Perfil',
     showImage: 'Mostrar Imagen en CV',
@@ -219,6 +220,7 @@ const translations = {
     native: 'Muttersprache',
     present: 'Gegenwart',
     dateOfBirth: 'Geburtsdatum',
+    age: 'Alter',
     showAge: 'Alter anzeigen',
     uploadImage: 'Profilbild hochladen',
     showImage: 'Bild im CV anzeigen',
@@ -266,6 +268,7 @@ const translations = {
     native: 'Maternji',
     present: 'Sadašnje',
     dateOfBirth: 'Datum rođenja',
+    age: 'Godine',
     showAge: 'Prikaži godine',
     uploadImage: 'Učitaj sliku profila',
     showImage: 'Prikaži sliku u CV-u',
@@ -482,6 +485,15 @@ export default function CVBuilder() {
     if (!element) return;
 
     try {
+      // Pre-render image loading guarantee
+      await new Promise<void>(resolve => {
+        if (document.images.length > 0) {
+          const img = document.images[0];
+          img.onload = () => resolve();
+          if (img.complete) resolve();
+        } else resolve();
+      });
+
       // Create a temporary container for PDF generation
       const tempContainer = document.createElement('div');
       tempContainer.style.position = 'absolute';
@@ -490,7 +502,7 @@ export default function CVBuilder() {
       tempContainer.style.width = '210mm';
       tempContainer.style.height = '297mm';
       tempContainer.style.backgroundColor = '#ffffff';
-      tempContainer.style.padding = '20mm';
+      tempContainer.style.padding = '10mm'; // Reduced from 20mm to 10mm (50% reduction)
       tempContainer.style.boxSizing = 'border-box';
       tempContainer.style.fontFamily = 'system-ui, -apple-system, sans-serif';
       tempContainer.style.fontSize = '12px';
@@ -503,6 +515,17 @@ export default function CVBuilder() {
       clonedElement.style.margin = '0';
       clonedElement.style.padding = '0';
       clonedElement.style.backgroundColor = '#ffffff';
+      
+      // Add image rendering optimization for profile images
+      const images = clonedElement.querySelectorAll('img');
+      images.forEach(img => {
+        img.style.imageRendering = 'pixelated';
+        // Ensure proper scaling for PDF generation
+        if (img.classList.contains('w-24') && img.classList.contains('h-24')) {
+          img.style.width = '96px'; // 24 * 4px = 96px for better PDF quality
+          img.style.height = '96px';
+        }
+      });
       
       tempContainer.appendChild(clonedElement);
       document.body.appendChild(tempContainer);
@@ -520,14 +543,14 @@ export default function CVBuilder() {
       document.body.removeChild(tempContainer);
       
       const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdf = new jsPDF('p', 'mm', 'a4', true); // Added true parameter for better quality
       
       // A4 dimensions: 210mm x 297mm
       const pdfWidth = 210;
       const pdfHeight = 297;
       
-      // Set margins to 15mm on all sides
-      const margin = 15;
+      // Set margins to 7.5mm on all sides (50% reduction from 15mm)
+      const margin = 7.5;
       const contentWidth = pdfWidth - (margin * 2);
       const contentHeight = pdfHeight - (margin * 2);
       
@@ -1057,20 +1080,19 @@ export default function CVBuilder() {
                       </h1>
                       <div className="text-muted-foreground space-y-1">
                         {cvData.personalInfo.email && (
-                          <div>{cvData.personalInfo.email}</div>
+                          <div>{t.email}: {cvData.personalInfo.email}</div>
                         )}
                         {cvData.personalInfo.phone && (
-                          <div>{cvData.personalInfo.phone}</div>
+                          <div>{t.phone}: {cvData.personalInfo.phone}</div>
                         )}
                         {cvData.personalInfo.address && (
-                          <div>{cvData.personalInfo.address}</div>
+                          <div>{t.address}: {cvData.personalInfo.address}</div>
                         )}
                         {cvData.personalInfo.dateOfBirth && (
-                          <div className="flex items-center gap-1">
-                            <Calendar className="h-4 w-4" />
+                          <div>
                             {cvData.personalInfo.showAge 
-                              ? `Age: ${calculateAge(cvData.personalInfo.dateOfBirth)}` 
-                              : new Date(cvData.personalInfo.dateOfBirth).toLocaleDateString()
+                              ? `${t.age}: ${calculateAge(cvData.personalInfo.dateOfBirth)}` 
+                              : `${t.dateOfBirth}: ${new Date(cvData.personalInfo.dateOfBirth).toLocaleDateString()}`
                             }
                           </div>
                         )}
