@@ -564,17 +564,36 @@ export default function CVBuilder() {
       const images = clonedElement.querySelectorAll('img.profile-image');
       images.forEach(img => {
         const image = img as HTMLImageElement;
+        // Force a perfect circle and correct border for PDF rendering
         image.style.width = '125px';
         image.style.height = '125px';
-        (image.style as any).aspectRatio = '1/1'; // aspectRatio is not in all TS DOM types
+        image.style.borderRadius = '50%';
+        image.style.borderWidth = '2px';
+        image.style.borderStyle = 'solid';
+        image.style.borderColor = '#2563eb'; // Tailwind primary color fallback
         image.style.objectFit = 'cover';
+        image.style.aspectRatio = '1/1';
+        image.style.background = '#fff';
+        image.style.boxSizing = 'border-box';
+        image.style.display = 'block';
+      });
+
+      // --- Font size and scaling fix for PDF ---
+      // Match the preview font size (16px) and line height
+      clonedElement.style.fontSize = '16px';
+      clonedElement.style.lineHeight = '1.5';
+      // Also set for all children
+      clonedElement.querySelectorAll('*').forEach(el => {
+        (el as HTMLElement).style.fontSize = '';
+        (el as HTMLElement).style.lineHeight = '';
       });
 
       tempContainer.appendChild(clonedElement);
       document.body.appendChild(tempContainer);
 
+      // Use html2canvas at devicePixelRatio for best fidelity
       const canvas = await html2canvas(tempContainer, {
-        scale: 2,
+        scale: window.devicePixelRatio || 2,
         useCORS: true,
         allowTaint: true,
         backgroundColor: '#ffffff',
