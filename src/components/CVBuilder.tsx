@@ -33,6 +33,7 @@ import { Skill } from '../interfaces/Skill';
 import { Language } from '../interfaces/Language';
 import { CVData } from '../interfaces/CVData';
 import { SupportedLanguage } from '../types/SupportedLanguage';
+import { Header } from './Header';
 
 export default function CVBuilder() {
   const [language, setLanguage] = useState<SupportedLanguage>('en');
@@ -289,43 +290,14 @@ export default function CVBuilder() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-white border-b border-border sticky top-0 z-50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-            {t.cvBuilder}
-          </h1>
-          
-          <div className="flex items-center gap-4">
-            <Select value={language} onValueChange={(value) => setLanguage(value as SupportedLanguage)}>
-              <SelectTrigger className="w-32">
-                <Globe className="h-4 w-4 mr-2" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="en">English</SelectItem>
-                <SelectItem value="es">Español</SelectItem>
-                <SelectItem value="de">Deutsch</SelectItem>
-                <SelectItem value="hr">Hrvatski/Srpski/Bosanski</SelectItem>
-              </SelectContent>
-            </Select>
-            
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={loadCV} size="sm">
-                <Upload className="h-4 w-4 mr-2" />
-                {t.load}
-              </Button>
-              <Button variant="outline" onClick={saveCV} size="sm">
-                <Save className="h-4 w-4 mr-2" />
-                {t.save}
-              </Button>
-              <Button onClick={downloadPDF} size="sm" className="bg-gradient-primary hover:shadow-glow">
-                <Download className="h-4 w-4 mr-2" />
-                {t.download}
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <Header
+        language={language}
+        setLanguage={setLanguage}
+        t={t}
+        loadCV={loadCV}
+        saveCV={saveCV}
+        downloadPDF={downloadPDF}
+      />
 
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-120px)]">
