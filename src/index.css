@@ -173,4 +173,70 @@ All colors MUST be HSL.
       aspect-ratio: auto;
     }
   }
+
+  /* Skills and Languages Grid Layout */
+  .skills-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  
+  .skills-column {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .skills-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  /* Responsive grid for smaller screens */
+  @media (max-width: 768px) {
+    .skills-container {
+      grid-template-columns: 1fr;
+    }
+    
+    .skills-row {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Profile Image Enhancements */
+  .profile-image {
+    width: 120px;
+    height: 120px;
+    object-fit: contain;
+    aspect-ratio: 1/1;
+    transition: all 0.3s ease;
+  }
+
+  .profile-image:hover {
+    transform: scale(1.05);
+  }
+
+  /* PDF-specific profile image sizing */
+  @media print {
+    .profile-image {
+      width: 136px;
+      height: 136px;
+      object-fit: cover;
+    }
+  }
+
+  /* Profile Image Preview in Form */
+  .profile-image-preview {
+    width: 56px;
+    height: 56px;
+    object-fit: cover;
+    aspect-ratio: 1/1;
+    transition: all 0.3s ease;
+  }
+
+  .profile-image-preview:hover {
+    transform: scale(1.1);
+  }
 }

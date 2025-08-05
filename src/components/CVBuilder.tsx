@@ -301,6 +301,12 @@ export default function CVBuilder() {
 
   const generateId = () => Math.random().toString(36).substr(2, 9);
 
+  // Utility function to chunk arrays for grid layout
+  const chunkArray = (arr: any[], size: number) => 
+    Array.from({ length: Math.ceil(arr.length / size) }, (_, i) =>
+      arr.slice(i * size, i * size + size)
+    );
+
   const calculateAge = (dateOfBirth: string): number => {
     if (!dateOfBirth) return 0;
     const today = new Date();
@@ -313,9 +319,47 @@ export default function CVBuilder() {
     return age;
   };
 
+  // --- Helper Functions ---
+
+  // Distribute skills/languages into two columns as specified
+  const distributeSkills = <T,>(items: T[]): [T[], T[]] => {
+    const col1 = items.slice(0, 3);
+    const col2 = items.slice(3, 6);
+    items.slice(6).forEach((item, idx) => {
+      (idx % 2 === 0 ? col1 : col2).push(item);
+    });
+    return [col1, col2];
+  };
+
+  // Validate image type and size
+  const validateImage = (file: File) => {
+    const validTypes = ['image/jpeg', 'image/png'];
+    const maxSize = 2 * 1024 * 1024; // 2MB
+    return validTypes.includes(file.type) && file.size <= maxSize;
+  };
+
+  // Validate URL (simple version)
+  const isValidUrl = (url: string) => {
+    try {
+      if (!url) return false;
+      const u = new URL(url.startsWith('http') ? url : 'https://' + url);
+      return !!u.hostname;
+    } catch {
+      return false;
+    }
+  };
+
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      if (!validateImage(file)) {
+        toast({
+          title: "Invalid Image",
+          description: "Please upload a JPEG or PNG image under 2MB.",
+          variant: "destructive"
+        });
+        return;
+      }
       const reader = new FileReader();
       reader.onload = (e) => {
         const result = e.target?.result as string;
@@ -502,12 +546,12 @@ export default function CVBuilder() {
       tempContainer.style.width = '210mm';
       tempContainer.style.height = '297mm';
       tempContainer.style.backgroundColor = '#ffffff';
-      tempContainer.style.padding = '10mm'; // Reduced from 20mm to 10mm (50% reduction)
+      tempContainer.style.padding = '10mm';
       tempContainer.style.boxSizing = 'border-box';
       tempContainer.style.fontFamily = 'system-ui, -apple-system, sans-serif';
       tempContainer.style.fontSize = '12px';
       tempContainer.style.lineHeight = '1.4';
-      
+
       // Clone the CV content
       const clonedElement = element.cloneNode(true) as HTMLElement;
       clonedElement.style.width = '100%';
@@ -515,18 +559,17 @@ export default function CVBuilder() {
       clonedElement.style.margin = '0';
       clonedElement.style.padding = '0';
       clonedElement.style.backgroundColor = '#ffffff';
-      
-      // Add image rendering optimization for profile images
-      const images = clonedElement.querySelectorAll('img');
+
+      // --- Profile image PDF enhancement ---
+      const images = clonedElement.querySelectorAll('img.profile-image');
       images.forEach(img => {
-        img.style.imageRendering = 'pixelated';
-        // Ensure proper scaling for PDF generation
-        if (img.classList.contains('w-24') && img.classList.contains('h-24')) {
-          img.style.width = '96px'; // 24 * 4px = 96px for better PDF quality
-          img.style.height = '96px';
-        }
+        const image = img as HTMLImageElement;
+        image.style.width = '125px';
+        image.style.height = '125px';
+        (image.style as any).aspectRatio = '1/1'; // aspectRatio is not in all TS DOM types
+        image.style.objectFit = 'cover';
       });
-      
+
       tempContainer.appendChild(clonedElement);
       document.body.appendChild(tempContainer);
 
@@ -535,33 +578,27 @@ export default function CVBuilder() {
         useCORS: true,
         allowTaint: true,
         backgroundColor: '#ffffff',
-        width: 794, // 210mm at 96 DPI
-        height: 1123 // 297mm at 96 DPI
+        width: 794,
+        height: 1123
       });
-      
-      // Clean up
+
       document.body.removeChild(tempContainer);
-      
+
       const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4', true); // Added true parameter for better quality
-      
-      // A4 dimensions: 210mm x 297mm
+      const pdf = new jsPDF('p', 'mm', 'a4', true);
+
       const pdfWidth = 210;
       const pdfHeight = 297;
-      
-      // Set margins to 7.5mm on all sides (50% reduction from 15mm)
       const margin = 7.5;
       const contentWidth = pdfWidth - (margin * 2);
       const contentHeight = pdfHeight - (margin * 2);
-      
-      // Calculate scaling to fit content within margins
+
       const imgWidth = canvas.width;
       const imgHeight = canvas.height;
       const scaleX = contentWidth / imgWidth;
       const scaleY = contentHeight / imgHeight;
       const scale = Math.min(scaleX, scaleY);
-      
-      // Center the image within the page
+
       const scaledWidth = imgWidth * scale;
       const scaledHeight = imgHeight * scale;
       const x = margin + (contentWidth - scaledWidth) / 2;
@@ -569,7 +606,7 @@ export default function CVBuilder() {
 
       pdf.addImage(imgData, 'PNG', x, y, scaledWidth, scaledHeight);
       pdf.save(`${cvData.personalInfo.fullName || 'CV'}.pdf`);
-      
+
       toast({
         title: "PDF Downloaded",
         description: "Your CV has been downloaded as a PDF.",
@@ -666,7 +703,7 @@ export default function CVBuilder() {
                               <img
                                 src={cvData.personalInfo.profileImage}
                                 alt="Profile preview"
-                                className="w-12 h-12 rounded-full object-cover border"
+                                className="w-14 h-14 rounded-full object-cover border profile-image-preview"
                               />
                               <div className="flex items-center space-x-2">
                                 <Switch
@@ -962,41 +999,45 @@ export default function CVBuilder() {
                       </Button>
                     </div>
                     <div className="space-y-4">
-                      {cvData.skills.map((skill) => (
-                        <div key={skill.id} className="flex items-end gap-3">
-                          <div className="flex-1">
-                            <Label>{t.skillName}</Label>
-                            <Input
-                              value={skill.name}
-                              onChange={(e) => updateSkill(skill.id, 'name', e.target.value)}
-                              className="mt-1"
-                            />
-                          </div>
-                          <div className="w-32">
-                            <Label>{t.level}</Label>
-                            <Select
-                              value={skill.level}
-                              onValueChange={(value) => updateSkill(skill.id, 'level', value)}
-                            >
-                              <SelectTrigger className="mt-1">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="beginner">{t.beginner}</SelectItem>
-                                <SelectItem value="intermediate">{t.intermediate}</SelectItem>
-                                <SelectItem value="advanced">{t.advanced}</SelectItem>
-                                <SelectItem value="expert">{t.expert}</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <Button
-                            onClick={() => removeSkill(skill.id)}
-                            size="sm"
-                            variant="ghost"
-                            className="text-destructive hover:text-destructive mb-1"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                      {chunkArray(cvData.skills, 2).map((row, index) => (
+                        <div key={index} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          {row.map((skill) => (
+                            <div key={skill.id} className="flex items-end gap-3">
+                              <div className="flex-1">
+                                <Label>{t.skillName}</Label>
+                                <Input
+                                  value={skill.name}
+                                  onChange={(e) => updateSkill(skill.id, 'name', e.target.value)}
+                                  className="mt-1"
+                                />
+                              </div>
+                              <div className="w-32">
+                                <Label>{t.level}</Label>
+                                <Select
+                                  value={skill.level}
+                                  onValueChange={(value) => updateSkill(skill.id, 'level', value)}
+                                >
+                                  <SelectTrigger className="mt-1">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="beginner">{t.beginner}</SelectItem>
+                                    <SelectItem value="intermediate">{t.intermediate}</SelectItem>
+                                    <SelectItem value="advanced">{t.advanced}</SelectItem>
+                                    <SelectItem value="expert">{t.expert}</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <Button
+                                onClick={() => removeSkill(skill.id)}
+                                size="sm"
+                                variant="ghost"
+                                className="text-destructive hover:text-destructive mb-1"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ))}
                         </div>
                       ))}
                     </div>
@@ -1017,41 +1058,45 @@ export default function CVBuilder() {
                       </Button>
                     </div>
                     <div className="space-y-4">
-                      {cvData.languages.map((lang) => (
-                        <div key={lang.id} className="flex items-end gap-3">
-                          <div className="flex-1">
-                            <Label>{t.languageName}</Label>
-                            <Input
-                              value={lang.name}
-                              onChange={(e) => updateLanguage(lang.id, 'name', e.target.value)}
-                              className="mt-1"
-                            />
-                          </div>
-                          <div className="w-32">
-                            <Label>{t.proficiency}</Label>
-                            <Select
-                              value={lang.proficiency}
-                              onValueChange={(value) => updateLanguage(lang.id, 'proficiency', value)}
-                            >
-                              <SelectTrigger className="mt-1">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="basic">{t.basic}</SelectItem>
-                                <SelectItem value="conversational">{t.conversational}</SelectItem>
-                                <SelectItem value="fluent">{t.fluent}</SelectItem>
-                                <SelectItem value="native">{t.native}</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <Button
-                            onClick={() => removeLanguage(lang.id)}
-                            size="sm"
-                            variant="ghost"
-                            className="text-destructive hover:text-destructive mb-1"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                      {chunkArray(cvData.languages, 2).map((row, index) => (
+                        <div key={index} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          {row.map((lang) => (
+                            <div key={lang.id} className="flex items-end gap-3">
+                              <div className="flex-1">
+                                <Label>{t.languageName}</Label>
+                                <Input
+                                  value={lang.name}
+                                  onChange={(e) => updateLanguage(lang.id, 'name', e.target.value)}
+                                  className="mt-1"
+                                />
+                              </div>
+                              <div className="w-32">
+                                <Label>{t.proficiency}</Label>
+                                <Select
+                                  value={lang.proficiency}
+                                  onValueChange={(value) => updateLanguage(lang.id, 'proficiency', value)}
+                                >
+                                  <SelectTrigger className="mt-1">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="basic">{t.basic}</SelectItem>
+                                    <SelectItem value="conversational">{t.conversational}</SelectItem>
+                                    <SelectItem value="fluent">{t.fluent}</SelectItem>
+                                    <SelectItem value="native">{t.native}</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <Button
+                                onClick={() => removeLanguage(lang.id)}
+                                size="sm"
+                                variant="ghost"
+                                className="text-destructive hover:text-destructive mb-1"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ))}
                         </div>
                       ))}
                     </div>
@@ -1080,30 +1125,69 @@ export default function CVBuilder() {
                       </h1>
                       <div className="text-muted-foreground space-y-1">
                         {cvData.personalInfo.email && (
-                          <div>{t.email}: {cvData.personalInfo.email}</div>
-                        )}
-                        {cvData.personalInfo.phone && (
-                          <div>{t.phone}: {cvData.personalInfo.phone}</div>
-                        )}
-                        {cvData.personalInfo.address && (
-                          <div>{t.address}: {cvData.personalInfo.address}</div>
-                        )}
-                        {cvData.personalInfo.dateOfBirth && (
-                          <div>
-                            {cvData.personalInfo.showAge 
-                              ? `${t.age}: ${calculateAge(cvData.personalInfo.dateOfBirth)}` 
-                              : `${t.dateOfBirth}: ${new Date(cvData.personalInfo.dateOfBirth).toLocaleDateString()}`
-                            }
+                          <div className="contact-item">
+                            <span className="font-medium">{t.email}: </span>
+                            {cvData.personalInfo.email}
                           </div>
                         )}
-                        <div className="flex gap-4 mt-2">
-                          {cvData.personalInfo.linkedin && (
-                            <div className="text-primary">{cvData.personalInfo.linkedin}</div>
-                          )}
-                          {cvData.personalInfo.website && (
-                            <div className="text-primary">{cvData.personalInfo.website}</div>
-                          )}
-                        </div>
+                        {cvData.personalInfo.phone && (
+                          <div className="contact-item">
+                            <span className="font-medium">{t.phone}: </span>
+                            {cvData.personalInfo.phone}
+                          </div>
+                        )}
+                        {cvData.personalInfo.address && (
+                          <div className="contact-item">
+                            <span className="font-medium">{t.address}: </span>
+                            {cvData.personalInfo.address}
+                          </div>
+                        )}
+                        {cvData.personalInfo.dateOfBirth && (
+                          <div className="contact-item">
+                            <span className="font-medium">
+                              {cvData.personalInfo.showAge
+                                ? `${t.age}: `
+                                : `${t.dateOfBirth}: `}
+                            </span>
+                            {cvData.personalInfo.showAge
+                              ? calculateAge(cvData.personalInfo.dateOfBirth)
+                              : new Date(cvData.personalInfo.dateOfBirth).toLocaleDateString()}
+                          </div>
+                        )}
+                        {isValidUrl(cvData.personalInfo.website) && (
+                          <div className="contact-item">
+                            <span className="font-medium">{t.website}: </span>
+                            <a
+                              href={
+                                cvData.personalInfo.website.startsWith('http')
+                                  ? cvData.personalInfo.website
+                                  : 'https://' + cvData.personalInfo.website
+                              }
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary underline break-all"
+                            >
+                              {cvData.personalInfo.website}
+                            </a>
+                          </div>
+                        )}
+                        {isValidUrl(cvData.personalInfo.linkedin) && (
+                          <div className="contact-item">
+                            <span className="font-medium">{t.linkedin}: </span>
+                            <a
+                              href={
+                                cvData.personalInfo.linkedin.startsWith('http')
+                                  ? cvData.personalInfo.linkedin
+                                  : 'https://' + cvData.personalInfo.linkedin
+                              }
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary underline break-all"
+                            >
+                              {cvData.personalInfo.linkedin}
+                            </a>
+                          </div>
+                        )}
                       </div>
                     </div>
                     {cvData.personalInfo.profileImage && cvData.personalInfo.showImage && (
@@ -1111,7 +1195,8 @@ export default function CVBuilder() {
                         <img
                           src={cvData.personalInfo.profileImage}
                           alt="Profile"
-                          className="w-24 h-24 rounded-full object-cover border-2 border-primary"
+                          className="profile-image rounded-full object-cover border-2 border-primary"
+                          style={{ width: 125, height: 125, aspectRatio: '1/1', objectFit: 'cover' }}
                         />
                       </div>
                     )}
@@ -1182,15 +1267,34 @@ export default function CVBuilder() {
                     <h2 className="text-xl font-bold text-primary mb-4 border-b border-border pb-2">
                       {t.skills}
                     </h2>
-                    <div className="space-y-2">
-                      {cvData.skills.map((skill) => (
-                        <div key={skill.id} className="flex items-center gap-2">
-                          <span className="font-medium text-foreground">{skill.name}</span>
-                          <span className="text-sm text-muted-foreground">
-                            ({t[skill.level as keyof typeof t] || skill.level})
-                          </span>
-                        </div>
-                      ))}
+                    <div className="skills-grid flex gap-8">
+                      {(() => {
+                        const [skillsCol1, skillsCol2] = distributeSkills(cvData.skills);
+                        return (
+                          <>
+                            <div className="skills-column flex flex-col gap-2 flex-1">
+                              {skillsCol1.map((skill) => (
+                                <div key={skill.id} className="flex items-center gap-2">
+                                  <span className="font-medium text-foreground">{skill.name}</span>
+                                  <span className="text-sm text-muted-foreground">
+                                    ({t[skill.level as keyof typeof t] || skill.level})
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                            <div className="skills-column flex flex-col gap-2 flex-1">
+                              {skillsCol2.map((skill) => (
+                                <div key={skill.id} className="flex items-center gap-2">
+                                  <span className="font-medium text-foreground">{skill.name}</span>
+                                  <span className="text-sm text-muted-foreground">
+                                    ({t[skill.level as keyof typeof t] || skill.level})
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </>
+                        );
+                      })()}
                     </div>
                   </div>
                 )}
@@ -1201,15 +1305,34 @@ export default function CVBuilder() {
                     <h2 className="text-xl font-bold text-primary mb-4 border-b border-border pb-2">
                       {t.languages}
                     </h2>
-                    <div className="space-y-2">
-                      {cvData.languages.map((lang) => (
-                        <div key={lang.id} className="flex items-center gap-2">
-                          <span className="font-medium text-foreground">{lang.name}</span>
-                          <span className="text-sm text-muted-foreground">
-                            ({t[lang.proficiency as keyof typeof t] || lang.proficiency})
-                          </span>
-                        </div>
-                      ))}
+                    <div className="skills-grid flex gap-8">
+                      {(() => {
+                        const [langCol1, langCol2] = distributeSkills(cvData.languages);
+                        return (
+                          <>
+                            <div className="skills-column flex flex-col gap-2 flex-1">
+                              {langCol1.map((lang) => (
+                                <div key={lang.id} className="flex items-center gap-2">
+                                  <span className="font-medium text-foreground">{lang.name}</span>
+                                  <span className="text-sm text-muted-foreground">
+                                    ({t[lang.proficiency as keyof typeof t] || lang.proficiency})
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                            <div className="skills-column flex flex-col gap-2 flex-1">
+                              {langCol2.map((lang) => (
+                                <div key={lang.id} className="flex items-center gap-2">
+                                  <span className="font-medium text-foreground">{lang.name}</span>
+                                  <span className="text-sm text-muted-foreground">
+                                    ({t[lang.proficiency as keyof typeof t] || lang.proficiency})
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </>
+                        );
+                      })()}
                     </div>
                   </div>
                 )}
