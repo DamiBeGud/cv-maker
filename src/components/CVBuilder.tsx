@@ -26,60 +26,14 @@ import {
 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import translations from './CVBuilder/translations';
-
-interface PersonalInfo {
-  fullName: string;
-  email: string;
-  phone: string;
-  address: string;
-  linkedin: string;
-  website: string;
-  dateOfBirth: string;
-  showAge: boolean;
-  profileImage: string | null;
-  showImage: boolean;
-}
-
-interface Education {
-  id: string;
-  degree: string;
-  institution: string;
-  startDate: string;
-  endDate: string;
-  description: string;
-}
-
-interface Experience {
-  id: string;
-  jobTitle: string;
-  company: string;
-  startDate: string;
-  endDate: string;
-  description: string;
-}
-
-interface Skill {
-  id: string;
-  name: string;
-  level: string;
-}
-
-interface Language {
-  id: string;
-  name: string;
-  proficiency: string;
-}
-
-interface CVData {
-  personalInfo: PersonalInfo;
-  education: Education[];
-  experience: Experience[];
-  skills: Skill[];
-  languages: Language[];
-}
-
-type SupportedLanguage = 'en' | 'es' | 'de' | 'hr';
+import translations from '../i18n/translations';
+import { PersonalInfo } from '../interfaces/PersonalInfo';
+import { Education } from '../interfaces/Education';
+import { Experience } from '../interfaces/Experience';
+import { Skill } from '../interfaces/Skill';
+import { Language } from '../interfaces/Language';
+import { CVData } from '../interfaces/CVData';
+import { SupportedLanguage } from '../types/SupportedLanguage';
 
 export default function CVBuilder() {
   const [language, setLanguage] = useState<SupportedLanguage>('en');

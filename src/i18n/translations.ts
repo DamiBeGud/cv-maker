@@ -1,4 +1,4 @@
-// src/components/CVBuilder/translations.ts
+// src/i18n/translations.ts
 
 const translations = {
   en: {
