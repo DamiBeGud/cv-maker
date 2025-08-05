@@ -482,23 +482,69 @@ export default function CVBuilder() {
     if (!element) return;
 
     try {
-      const canvas = await html2canvas(element, {
+      // Create a temporary container for PDF generation
+      const tempContainer = document.createElement('div');
+      tempContainer.style.position = 'absolute';
+      tempContainer.style.left = '-9999px';
+      tempContainer.style.top = '0';
+      tempContainer.style.width = '210mm';
+      tempContainer.style.height = '297mm';
+      tempContainer.style.backgroundColor = '#ffffff';
+      tempContainer.style.padding = '20mm';
+      tempContainer.style.boxSizing = 'border-box';
+      tempContainer.style.fontFamily = 'system-ui, -apple-system, sans-serif';
+      tempContainer.style.fontSize = '12px';
+      tempContainer.style.lineHeight = '1.4';
+      
+      // Clone the CV content
+      const clonedElement = element.cloneNode(true) as HTMLElement;
+      clonedElement.style.width = '100%';
+      clonedElement.style.height = '100%';
+      clonedElement.style.margin = '0';
+      clonedElement.style.padding = '0';
+      clonedElement.style.backgroundColor = '#ffffff';
+      
+      tempContainer.appendChild(clonedElement);
+      document.body.appendChild(tempContainer);
+
+      const canvas = await html2canvas(tempContainer, {
         scale: 2,
         useCORS: true,
-        allowTaint: true
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        width: 794, // 210mm at 96 DPI
+        height: 1123 // 297mm at 96 DPI
       });
+      
+      // Clean up
+      document.body.removeChild(tempContainer);
       
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'mm', 'a4');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
+      
+      // A4 dimensions: 210mm x 297mm
+      const pdfWidth = 210;
+      const pdfHeight = 297;
+      
+      // Set margins to 15mm on all sides
+      const margin = 15;
+      const contentWidth = pdfWidth - (margin * 2);
+      const contentHeight = pdfHeight - (margin * 2);
+      
+      // Calculate scaling to fit content within margins
       const imgWidth = canvas.width;
       const imgHeight = canvas.height;
-      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-      const imgX = (pdfWidth - imgWidth * ratio) / 2;
-      const imgY = 0;
+      const scaleX = contentWidth / imgWidth;
+      const scaleY = contentHeight / imgHeight;
+      const scale = Math.min(scaleX, scaleY);
+      
+      // Center the image within the page
+      const scaledWidth = imgWidth * scale;
+      const scaledHeight = imgHeight * scale;
+      const x = margin + (contentWidth - scaledWidth) / 2;
+      const y = margin + (contentHeight - scaledHeight) / 2;
 
-      pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+      pdf.addImage(imgData, 'PNG', x, y, scaledWidth, scaledHeight);
       pdf.save(`${cvData.personalInfo.fullName || 'CV'}.pdf`);
       
       toast({
@@ -516,7 +562,7 @@ export default function CVBuilder() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-subtle">
+    <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="bg-white border-b border-border sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -560,7 +606,7 @@ export default function CVBuilder() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-120px)]">
           {/* Form Sidebar */}
           <Card className="p-0 shadow-elegant overflow-hidden bg-card">
-            <ScrollArea className="h-full bg-card">
+            <ScrollArea className="h-full bg-card scrollbar-container">
               <div className="p-6 bg-card">
                 <div className="space-y-8">
                   {/* Personal Information */}
@@ -622,7 +668,7 @@ export default function CVBuilder() {
                         />
                       </div>
                       
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                           <Label htmlFor="email">{t.email}</Label>
                           <Input
@@ -654,7 +700,7 @@ export default function CVBuilder() {
                         />
                       </div>
                       
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                           <Label htmlFor="linkedin">{t.linkedin}</Label>
                           <Input
@@ -994,11 +1040,13 @@ export default function CVBuilder() {
 
           {/* CV Preview */}
           <Card className="p-6 shadow-elegant">
-            <div className="h-[calc(100vh-120px)] overflow-auto">
+            <div className="h-[calc(100vh-120px)] overflow-auto scrollbar-container">
               <div
                 id="cv-preview"
-                className="bg-white shadow-lg max-w-[21cm] mx-auto p-8 min-h-[29.7cm]"
-                style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}
+                className="bg-white shadow-lg mx-auto p-8 cv-preview-container"
+                style={{ 
+                  fontFamily: 'system-ui, -apple-system, sans-serif'
+                }}
               >
                 {/* Header */}
                 <div className="border-b-2 border-primary pb-6 mb-6">
@@ -1112,11 +1160,14 @@ export default function CVBuilder() {
                     <h2 className="text-xl font-bold text-primary mb-4 border-b border-border pb-2">
                       {t.skills}
                     </h2>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="space-y-2">
                       {cvData.skills.map((skill) => (
-                        <Badge key={skill.id} variant="secondary" className="px-3 py-1 flex items-center justify-center">
-                          <span className="leading-none">{skill.name} ({t[skill.level as keyof typeof t] || skill.level})</span>
-                        </Badge>
+                        <div key={skill.id} className="flex items-center gap-2">
+                          <span className="font-medium text-foreground">{skill.name}</span>
+                          <span className="text-sm text-muted-foreground">
+                            ({t[skill.level as keyof typeof t] || skill.level})
+                          </span>
+                        </div>
                       ))}
                     </div>
                   </div>
@@ -1128,11 +1179,14 @@ export default function CVBuilder() {
                     <h2 className="text-xl font-bold text-primary mb-4 border-b border-border pb-2">
                       {t.languages}
                     </h2>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="space-y-2">
                       {cvData.languages.map((lang) => (
-                        <Badge key={lang.id} variant="outline" className="px-3 py-1 flex items-center justify-center">
-                          <span className="leading-none">{lang.name} ({t[lang.proficiency as keyof typeof t] || lang.proficiency})</span>
-                        </Badge>
+                        <div key={lang.id} className="flex items-center gap-2">
+                          <span className="font-medium text-foreground">{lang.name}</span>
+                          <span className="text-sm text-muted-foreground">
+                            ({t[lang.proficiency as keyof typeof t] || lang.proficiency})
+                          </span>
+                        </div>
                       ))}
                     </div>
                   </div>

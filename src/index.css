@@ -116,5 +116,61 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    background: hsl(var(--background));
+    min-height: 100vh;
+  }
+
+  /* Ensure consistent background across all scrollable areas */
+  html, body, #root {
+    background: hsl(var(--background));
+  }
+
+  /* Custom scrollbar styling for consistency */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground));
+  }
+
+  /* Ensure all scrollable containers have consistent background */
+  .scrollbar-container {
+    background: hsl(var(--background));
+  }
+
+  /* A4 Template Responsive Design */
+  .cv-preview-container {
+    width: 210mm;
+    min-height: 297mm;
+    aspect-ratio: 210 / 297;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  @media (max-width: 768px) {
+    .cv-preview-container {
+      width: 100%;
+      min-height: auto;
+      aspect-ratio: auto;
+    }
+  }
+
+  @media (max-width: 1024px) {
+    .cv-preview-container {
+      width: 100%;
+      min-height: auto;
+      aspect-ratio: auto;
+    }
   }
 }
