@@ -24,6 +24,7 @@ import {
   Camera
 } from 'lucide-react';
 import { useDownloadPDF } from '../hooks/use-download-pdf';
+import { useHandleImageUpload } from '../hooks/use-handle-image-upload';
 import translations from '../i18n/translations';
 import { PersonalInfo } from '../interfaces/PersonalInfo';
 import { Education } from '../interfaces/Education';
@@ -112,28 +113,7 @@ export default function CVBuilder() {
     }
   };
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      if (!validateImage(file)) {
-        toast({
-          title: "Invalid Image",
-          description: "Please upload an image (JPG, JPEG, PNG, JFIF, PJPEG, PJP, GIF, BMP, WEBP) under 2MB.",
-          variant: "destructive"
-        });
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const result = e.target?.result as string;
-        setCvData(prev => ({
-          ...prev,
-          personalInfo: { ...prev.personalInfo, profileImage: result }
-        }));
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+  const handleImageUpload = useHandleImageUpload(setCvData);
 
   const updatePersonalInfo = (field: keyof PersonalInfo, value: string | boolean) => {
     setCvData(prev => ({
@@ -307,7 +287,7 @@ export default function CVBuilder() {
           <Sidebar
             t={t}
             cvData={cvData}
-            handleImageUpload={handleImageUpload}
+            handleImageUpload={handleImageUpload.handleImageUpload}
             updatePersonalInfo={updatePersonalInfo}
             addEducation={addEducation}
             updateEducation={updateEducation}

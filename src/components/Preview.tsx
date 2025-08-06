@@ -87,7 +87,7 @@ export const Preview: React.FC<PreviewProps> = ({ t, cvData, calculateAge, distr
                   src={cvData.personalInfo.profileImage}
                   alt="Profile"
                   className="profile-image rounded-full object-cover border-2 border-primary"
-                  style={{ width: 125, height: 125, aspectRatio: '1/1', objectFit: 'cover' }}
+                  // style={{ width: 125, height: 125, aspectRatio: '1/1', objectFit: 'cover' }}
                 />
               </div>
             )}
