@@ -62,6 +62,42 @@ export function useHandleImageUpload(setCvData: (cb: any) => void) {
             }
           }
         }
+        // If height > width, add white padding to both sides. If width >= height, do not add any stripes, just crop and resize
+        if (sh > sw) {
+          const pad = (sh - sw) / 2;
+          // Create a temp canvas to add white padding
+          const tempCanvas = document.createElement('canvas');
+          tempCanvas.width = sh;
+          tempCanvas.height = sh;
+          const tempCtx = tempCanvas.getContext('2d');
+          if (tempCtx) {
+            tempCtx.fillStyle = '#fff';
+            tempCtx.fillRect(0, 0, sh, sh);
+            // Draw the original image centered horizontally
+            tempCtx.drawImage(img, sx, sy, sw, sh, pad, 0, sw, sh);
+            // Now use the padded image for final crop
+            sx = 0;
+            sw = sh;
+            // Replace img.src with the padded image
+            img.src = tempCanvas.toDataURL('image/png');
+            img.onload = () => {
+              const canvas = document.createElement('canvas');
+              canvas.width = 250;
+              canvas.height = 250;
+              const ctx = canvas.getContext('2d');
+              if (ctx) {
+                ctx.clearRect(0, 0, 250, 250);
+                ctx.drawImage(img, sx, sy, sw, sh, 0, 0, 250, 250);
+                console.log('Image padded, cropped and resized. Final crop:', { sx, sy, sw, sh, faceDetected });
+                resolve(canvas.toDataURL('image/png'));
+              } else {
+                resolve(tempCanvas.toDataURL('image/png'));
+              }
+            };
+            return;
+          }
+        }
+        // If width >= height, do not add any stripes, just crop and resize
         const canvas = document.createElement('canvas');
         canvas.width = 250;
         canvas.height = 250;
@@ -72,7 +108,6 @@ export function useHandleImageUpload(setCvData: (cb: any) => void) {
           console.log('Image cropped and resized. Final crop:', { sx, sy, sw, sh, faceDetected });
           resolve(canvas.toDataURL('image/png'));
         } else {
-          console.log('Canvas context not available. Returning original image.');
           resolve(imageSrc);
         }
       };
