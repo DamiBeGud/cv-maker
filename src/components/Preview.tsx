@@ -11,7 +11,7 @@ interface PreviewProps {
 
 export const Preview: React.FC<PreviewProps> = ({ t, cvData, calculateAge, distributeSkills, isValidUrl }) => (
   <Card className="p-6 shadow-elegant">
-    <div className="h-[calc(100vh-120px)] overflow-auto scrollbar-container">
+    <div className="overflow-auto scrollbar-container">
       <div
         id="cv-preview"
         className="bg-white shadow-lg mx-auto p-8 cv-preview-container"
