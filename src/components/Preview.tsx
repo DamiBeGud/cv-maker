@@ -22,7 +22,7 @@ export const Preview: React.FC<PreviewProps> = ({ t, cvData, calculateAge, distr
           <div className="flex items-start gap-6">
             <div className="flex-1">
               <h1 className="text-3xl font-bold text-foreground mb-2">
-                {cvData.personalInfo.fullName || 'Your Name'}
+                {cvData.personalInfo.fullName || t.yourName}
               </h1>
               <div className="text-muted-foreground space-y-1">
                 {cvData.personalInfo.email && (

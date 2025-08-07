@@ -47,7 +47,8 @@ const translations = {
     showAge: 'Show Age Instead',
     uploadImage: 'Upload Profile Image',
     showImage: 'Show Image in CV',
-    portfolio: 'Portfolio'
+    portfolio: 'Portfolio',
+    yourName: 'Your Name'
   },
   es: {
     cvBuilder: 'Constructor de CV',
@@ -95,7 +96,8 @@ const translations = {
     showAge: 'Mostrar Edad',
     uploadImage: 'Subir Imagen de Perfil',
     showImage: 'Mostrar Imagen en CV',
-    portfolio: 'Portafolio'
+    portfolio: 'Portafolio',
+    yourName: 'Tu Nombre'
   },
   de: {
     cvBuilder: 'Lebenslauf-Generator',
@@ -143,7 +145,8 @@ const translations = {
     showAge: 'Alter anzeigen',
     uploadImage: 'Profilbild hochladen',
     showImage: 'Bild im CV anzeigen',
-    portfolio: 'Portfolio'
+    portfolio: 'Portfolio',
+    yourName: 'Dein Name'
   },
   hr: {
     cvBuilder: 'Kreator CV-a',
@@ -191,7 +194,8 @@ const translations = {
     showAge: 'Prikaži godine',
     uploadImage: 'Učitaj sliku profila',
     showImage: 'Prikaži sliku u CV-u',
-    portfolio: 'Portfolio'
+    portfolio: 'Portfolio',
+    yourName:'Tvoje Ime'
   }
 };
 

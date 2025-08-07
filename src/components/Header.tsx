@@ -26,9 +26,9 @@ export const Header: React.FC<HeaderProps> = ({ language, setLanguage, t, loadCV
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="de">Deutsch</SelectItem>
             <SelectItem value="en">English</SelectItem>
             <SelectItem value="es">Español</SelectItem>
-            <SelectItem value="de">Deutsch</SelectItem>
             <SelectItem value="hr">Hrvatski/Srpski/Bosanski</SelectItem>
           </SelectContent>
         </Select>

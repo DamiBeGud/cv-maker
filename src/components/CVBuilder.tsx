@@ -1,28 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Switch } from '@/components/ui/switch';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { toast } from '@/hooks/use-toast';
-import { 
-  Download, 
-  Save, 
-  Upload, 
-  Plus, 
-  Trash2, 
-  Languages, 
-  User, 
-  GraduationCap, 
-  Briefcase, 
-  Award,
-  Globe,
-  Camera
-} from 'lucide-react';
 import { useDownloadPDF } from '../hooks/use-download-pdf';
 import { useHandleImageUpload } from '../hooks/use-handle-image-upload';
 import translations from '../i18n/translations';
@@ -35,11 +12,10 @@ import { CVData } from '../interfaces/CVData';
 import { SupportedLanguage } from '../types/SupportedLanguage';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
-import { Card } from './ui/card';
 import { Preview } from './Preview';
 
 export default function CVBuilder() {
-  const [language, setLanguage] = useState<SupportedLanguage>('en');
+  const [language, setLanguage] = useState<SupportedLanguage>('de');
   const [cvData, setCvData] = useState<CVData>({
     personalInfo: {
       fullName: '',
