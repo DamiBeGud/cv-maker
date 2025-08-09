@@ -64,15 +64,15 @@ export const Header: React.FC<HeaderProps> = ({ language, setLanguage, t, loadCV
       {/* Mobile Menu Content */}
       {isMenuOpen && (
         <div className="md:hidden bg-white border-b border-border py-4 px-4 flex flex-col items-center gap-4">
-          <Button variant="outline" onClick={loadCV} size="sm">
+          <Button variant="outline" onClick={loadCV} size="sm" className="w-full">
             <Upload className="h-4 w-4 mr-2" />
             {t.load}
           </Button>
-          <Button variant="outline" onClick={saveCV} size="sm">
+          <Button variant="outline" onClick={saveCV} size="sm" className="w-full">
             <Save className="h-4 w-4 mr-2" />
             {t.save} 
           </Button>
-          <Button onClick={downloadPDF} size="sm" className="bg-gradient-primary hover:shadow-glow">
+          <Button onClick={downloadPDF} size="sm" className="bg-gradient-primary hover:shadow-glow w-full">
             <Download className="h-4 w-4 mr-2" />
             {t.download}
           </Button>

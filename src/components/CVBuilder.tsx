@@ -258,7 +258,7 @@ export default function CVBuilder() {
       />
 
       <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-120px)]">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:h-[calc(100vh-120px)]">
           {/* Form Sidebar */}
           <Sidebar
             t={t}
@@ -282,13 +282,15 @@ export default function CVBuilder() {
           />
 
           {/* CV Preview */}
-          <Preview
-            t={t}
-            cvData={cvData}
-            calculateAge={calculateAge}
-            distributeSkills={distributeSkills}
-            isValidUrl={isValidUrl}
-          />
+          <div className="self-start">
+            <Preview
+              t={t}
+              cvData={cvData}
+              calculateAge={calculateAge}
+              distributeSkills={distributeSkills}
+              isValidUrl={isValidUrl}
+            />
+          </div>
         </div>
       </div>
     </div>

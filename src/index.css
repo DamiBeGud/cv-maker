@@ -118,6 +118,7 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
     background: hsl(var(--background));
     min-height: 100vh;
+    overflow-x: hidden;
   }
 
   /* Ensure consistent background across all scrollable areas */
@@ -151,27 +152,20 @@ All colors MUST be HSL.
 
   /* A4 Template Responsive Design */
   .cv-preview-container {
-    width: 210mm;
-    min-height: 297mm;
+    width: 100%;
+    max-width: 210mm;
     aspect-ratio: 210 / 297;
-    max-width: 100%;
+    height: auto;
     box-sizing: border-box;
   }
 
-  @media (max-width: 768px) {
-    .cv-preview-container {
-      width: 100%;
-      min-height: auto;
-      aspect-ratio: auto;
-    }
-  }
-
-  @media (max-width: 1024px) {
-    .cv-preview-container {
-      width: 100%;
-      min-height: auto;
-      aspect-ratio: auto;
-    }
+  /* Mobile typography and preview padding */
+  @media (max-width: 480px) {
+    html { font-size: 15px; }
+    body { line-height: 1.55; }
+    .cv-preview-container { padding: 1rem; }
+    .cv-preview-container h1 { font-size: clamp(1.25rem, 6vw, 1.75rem); }
+    .cv-preview-container h2 { font-size: clamp(1rem, 5vw, 1.25rem); }
   }
 
   /* Skills and Languages Grid Layout */
@@ -220,6 +214,11 @@ All colors MUST be HSL.
 
   /* PDF-specific profile image sizing */
   @media print {
+    .cv-preview-container {
+      width: 210mm;
+      height: 297mm;
+      min-height: 297mm;
+    }
     .profile-image {
       width: 136px;
       height: 136px;

@@ -41,7 +41,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   calculateAge, chunkArray
 }) => (
   <Card className="p-0 shadow-elegant overflow-hidden bg-card">
-    <ScrollArea className="h-full bg-card scrollbar-container">
+    <ScrollArea className="h-full scrollbar-container sidebar-scroll">
       <div className="p-6 bg-card">
         <div className="space-y-8">
           {/* Personal Information */}
@@ -54,7 +54,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               {/* Image Upload */}
               <div className="space-y-3">
                 <Label htmlFor="profileImage">{t.uploadImage}</Label>
-                <div className="flex items-center gap-4">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                   <div className="relative">
                     <Input
                       id="profileImage"
@@ -66,7 +66,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     <Button
                       variant="outline"
                       onClick={() => document.getElementById('profileImage')?.click()}
-                      className="flex items-center gap-2"
+                      className="flex items-center gap-2 w-full sm:w-auto justify-center sm:justify-start"
                       type="button"
                     >
                       <Camera className="h-4 w-4" />
@@ -357,7 +357,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <Award className="h-5 w-5 text-primary" />
                 <h2 className="text-lg font-semibold">{t.skills}</h2>
               </div>
-              <Button onClick={addSkill} size="sm" variant="outline">
+              <Button onClick={addSkill} size="sm" variant="outline" className="w-full sm:w-auto">
                 <Plus className="h-4 w-4 mr-2" />
                 {t.addSkill}
               </Button>
@@ -375,7 +375,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           className="mt-1"
                         />
                       </div>
-                      <div className="w-32">
+                      <div className="w-full sm:w-32">
                         <Label>{t.level}</Label>
                         <Select
                           value={skill.level}
@@ -414,7 +414,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <Languages className="h-5 w-5 text-primary" />
                 <h2 className="text-lg font-semibold">{t.languages}</h2>
               </div>
-              <Button onClick={addLanguage} size="sm" variant="outline">
+              <Button onClick={addLanguage} size="sm" variant="outline" className="w-full sm:w-auto">
                 <Plus className="h-4 w-4 mr-2" />
                 {t.addLanguage}
               </Button>
@@ -432,7 +432,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           className="mt-1"
                         />
                       </div>
-                      <div className="w-32">
+                      <div className="w-full sm:w-32">
                         <Label>{t.proficiency}</Label>
                         <Select
                           value={lang.proficiency}

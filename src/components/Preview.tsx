@@ -10,18 +10,18 @@ interface PreviewProps {
 }
 
 export const Preview: React.FC<PreviewProps> = ({ t, cvData, calculateAge, distributeSkills, isValidUrl }) => (
-  <Card className="p-6 shadow-elegant">
+  <Card className="p-4 sm:p-6 shadow-elegant">
     <div className="overflow-auto scrollbar-container">
       <div
         id="cv-preview"
-        className="bg-white shadow-lg mx-auto p-8 cv-preview-container"
+        className="bg-white shadow-lg mx-auto p-4 sm:p-6 md:p-8 cv-preview-container"
         style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}
       >
         {/* Header */}
         <div className="border-b-2 border-primary pb-6 mb-6">
           <div className="flex items-start gap-6">
             <div className="flex-1">
-              <h1 className="text-3xl font-bold text-foreground mb-2">
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
                 {cvData.personalInfo.fullName || t.yourName}
               </h1>
               <div className="text-muted-foreground space-y-1">
@@ -97,7 +97,7 @@ export const Preview: React.FC<PreviewProps> = ({ t, cvData, calculateAge, distr
         {/* Experience */}
         {cvData.experience.length > 0 && (
           <div className="mb-6">
-            <h2 className="text-xl font-bold text-primary mb-4 border-b border-border pb-2">
+            <h2 className="text-lg sm:text-xl font-bold text-primary mb-4 border-b border-border pb-2">
               {t.workExperience}
             </h2>
             <div className="space-y-4">
@@ -126,7 +126,7 @@ export const Preview: React.FC<PreviewProps> = ({ t, cvData, calculateAge, distr
         {/* Education */}
         {cvData.education.length > 0 && (
           <div className="mb-6">
-            <h2 className="text-xl font-bold text-primary mb-4 border-b border-border pb-2">
+            <h2 className="text-lg sm:text-xl font-bold text-primary mb-4 border-b border-border pb-2">
               {t.education}
             </h2>
             <div className="space-y-4">
@@ -155,7 +155,7 @@ export const Preview: React.FC<PreviewProps> = ({ t, cvData, calculateAge, distr
         {/* Skills */}
         {cvData.skills.length > 0 && (
           <div className="mb-6">
-            <h2 className="text-xl font-bold text-primary mb-4 border-b border-border pb-2">
+            <h2 className="text-lg sm:text-xl font-bold text-primary mb-4 border-b border-border pb-2">
               {t.skills}
             </h2>
             <div className="skills-grid flex gap-8">
@@ -193,7 +193,7 @@ export const Preview: React.FC<PreviewProps> = ({ t, cvData, calculateAge, distr
         {/* Languages */}
         {cvData.languages.length > 0 && (
           <div className="mb-6">
-            <h2 className="text-xl font-bold text-primary mb-4 border-b border-border pb-2">
+            <h2 className="text-lg sm:text-xl font-bold text-primary mb-4 border-b border-border pb-2">
               {t.languages}
             </h2>
             <div className="skills-grid flex gap-8">
