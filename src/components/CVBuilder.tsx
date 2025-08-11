@@ -243,6 +243,26 @@ export default function CVBuilder() {
     }
   };
 
+  // Reorder helpers for drag-and-drop
+  const reorderByIds = <T extends { id: string }>(items: T[], ids: string[]): T[] => {
+    const map = new Map(items.map((i) => [i.id, i]));
+    return ids.map((id) => map.get(id)!).filter(Boolean) as T[];
+  };
+
+  const onReorderEducation = (orderedIds: string[]) => {
+    setCvData((prev) => ({
+      ...prev,
+      education: reorderByIds(prev.education, orderedIds),
+    }));
+  };
+
+  const onReorderExperience = (orderedIds: string[]) => {
+    setCvData((prev) => ({
+      ...prev,
+      experience: reorderByIds(prev.experience, orderedIds),
+    }));
+  };
+
   const downloadPDF = useDownloadPDF(cvData);
 
   return (
@@ -279,6 +299,8 @@ export default function CVBuilder() {
             removeLanguage={removeLanguage}
             calculateAge={calculateAge}
             chunkArray={chunkArray}
+            onReorderEducation={onReorderEducation}
+            onReorderExperience={onReorderExperience}
           />
 
           {/* CV Preview */}

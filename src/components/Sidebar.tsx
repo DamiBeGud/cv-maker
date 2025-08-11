@@ -1,5 +1,6 @@
 import React from 'react';
 import { Card } from './ui/card';
+import { SortableList } from './dnd/SortableList';
 import { ScrollArea } from './ui/scroll-area';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -9,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Separator } from './ui/separator';
 import { Switch } from './ui/switch';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
-import { User, Camera, GraduationCap, Plus, Trash2, Briefcase, Award, Languages } from 'lucide-react';
+import { User, Camera, GraduationCap, Plus, Trash2, Briefcase, Award, Languages, GripVertical } from 'lucide-react';
 
 interface SidebarProps {
   t: any;
@@ -30,6 +31,8 @@ interface SidebarProps {
   removeLanguage: (id: string) => void;
   calculateAge: (dateOfBirth: string) => number;
   chunkArray: (arr: any[], size: number) => any[][];
+  onReorderEducation: (orderedIds: string[]) => void;
+  onReorderExperience: (orderedIds: string[]) => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -38,7 +41,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   addExperience, updateExperience, removeExperience,
   addSkill, updateSkill, removeSkill,
   addLanguage, updateLanguage, removeLanguage,
-  calculateAge, chunkArray
+  calculateAge, chunkArray,
+  onReorderEducation, onReorderExperience
 }) => (
   <Card className="p-0 shadow-elegant overflow-hidden bg-card">
     <ScrollArea className="h-full scrollbar-container sidebar-scroll">
@@ -196,11 +200,27 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     <Plus className="h-4 w-4 mr-2" />
                     {t.addEducation}
                   </Button>
-                  <div className="space-y-6">
-                    {cvData.education.map((edu: any) => (
-                      <Card key={edu.id} className="p-4 bg-muted/50">
+                  <SortableList items={cvData.education} onReorder={onReorderEducation}>
+                    {(edu: any, sortable) => (
+                      <Card
+                        key={edu.id}
+                        ref={sortable.setNodeRef}
+                        style={sortable.style}
+                        className="p-4 bg-muted/50"
+                      >
                         <div className="flex justify-between items-start mb-4">
-                          <h3 className="font-medium">{t.education}</h3>
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              aria-label="Drag handle"
+                              className="cursor-grab touch-pan-y active:cursor-grabbing text-muted-foreground hover:text-foreground"
+                              {...sortable.attributes}
+                              {...sortable.listeners}
+                            >
+                              <GripVertical className="h-4 w-4" />
+                            </button>
+                            <h3 className="font-medium">{t.education}</h3>
+                          </div>
                           <Button
                             onClick={() => removeEducation(edu.id)}
                             size="sm"
@@ -258,8 +278,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           </div>
                         </div>
                       </Card>
-                    ))}
-                  </div>
+                    )}
+                  </SortableList>
                 </div>
               </AccordionContent>
             </AccordionItem>
@@ -280,11 +300,27 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     <Plus className="h-4 w-4 mr-2" />
                     {t.addExperience}
                   </Button>
-                  <div className="space-y-6">
-                    {cvData.experience.map((exp: any) => (
-                      <Card key={exp.id} className="p-4 bg-muted/50">
+                  <SortableList items={cvData.experience} onReorder={onReorderExperience}>
+                    {(exp: any, sortable) => (
+                      <Card
+                        key={exp.id}
+                        ref={sortable.setNodeRef}
+                        style={sortable.style}
+                        className="p-4 bg-muted/50"
+                      >
                         <div className="flex justify-between items-start mb-4">
-                          <h3 className="font-medium">{t.workExperience}</h3>
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              aria-label="Drag handle"
+                              className="cursor-grab touch-pan-y active:cursor-grabbing text-muted-foreground hover:text-foreground"
+                              {...sortable.attributes}
+                              {...sortable.listeners}
+                            >
+                              <GripVertical className="h-4 w-4" />
+                            </button>
+                            <h3 className="font-medium">{t.workExperience}</h3>
+                          </div>
                           <Button
                             onClick={() => removeExperience(exp.id)}
                             size="sm"
@@ -343,8 +379,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           </div>
                         </div>
                       </Card>
-                    ))}
-                  </div>
+                    )}
+                  </SortableList>
                 </div>
               </AccordionContent>
             </AccordionItem>
